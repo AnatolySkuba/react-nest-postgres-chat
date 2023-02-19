@@ -9,7 +9,13 @@
     "devDependencies": {
         "prisma": "^4.10.1"
     },
+    "scripts": {
+        "dev:client": "yarn --cwd client dev",
+        "dev:server": "yarn --cwd server start:dev",
+        "dev": "concurrently \"yarn dev:client\" \"yarn dev:server\""
+    },
     "dependencies": {
-        "@prisma/client": "^4.10.1"
+        "@prisma/client": "^4.10.1",
+        "concurrently": "^7.6.0"
     }
 }
