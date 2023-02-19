@@ -1,0 +1,15 @@
+{
+    "name": "react-nest-postgres-chat",
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": "git@github.com:AnatolySkuba/react-nest-postgres-chat.git",
+    "author": "Anatoly Skuba <anatoly.skuba@gmail.com>",
+    "license": "MIT",
+    "private": true,
+    "devDependencies": {
+        "prisma": "^4.10.1"
+    },
+    "dependencies": {
+        "@prisma/client": "^4.10.1"
+    }
+}
