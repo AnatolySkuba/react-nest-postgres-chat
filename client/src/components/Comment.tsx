@@ -9,6 +9,7 @@ import { useComment } from "../hooks";
 import { UserInfo } from "../types";
 import { storage } from "../utils";
 import { USER_INFO } from "../constants";
+import { CommentList } from "./CommentList";
 
 export const Comment = ({
     id,
@@ -24,25 +25,15 @@ export const Comment = ({
     updatedAt,
 }: IComment) => {
     const userInfo = storage.get<UserInfo>(USER_INFO) as UserInfo;
-    const { commentActions } = useComment();
+    const { commentActions, getReplies } = useComment();
     const [isReplying, setIsReplying] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const userComment = userId === userInfo?.userId;
+    const childComments = getReplies(id);
 
     const onCommentReply = (
         comment: Prisma.CommentCreateInput | Prisma.CommentUncheckedCreateInput
     ) => {
-        // if (userInfo) comment = { ...comment, parentId: id };
-        // if (!userInfo) {
-        //     comment = {
-        //         ...comment,
-        //         parent: {
-        //             connect: {
-        //                 id,
-        //             },
-        //         },
-        //     };
-        // }
         setIsReplying(false);
         commentActions.send({ ...comment, parentId: id });
     };
@@ -55,7 +46,7 @@ export const Comment = ({
         commentActions.update({ id, text, file, image });
     };
 
-    const removeComment = (id: string) => {
+    const onCommentDelete = (id: string) => {
         commentActions.remove({ id });
     };
 
@@ -66,7 +57,7 @@ export const Comment = ({
     };
 
     return (
-        <div className={`${parentId && "pl-5"}`}>
+        <div className="">
             <div
                 className={`my-2 rounded-md w-full border ${
                     userComment ? "border-green-100" : "border-gray-100"
@@ -108,7 +99,7 @@ export const Comment = ({
                                 <button
                                     className="text-red-500 hover:text-red-400"
                                     onClick={() => {
-                                        removeComment(id);
+                                        onCommentDelete(id);
                                     }}
                                 >
                                     <FaTrash size="12" />
@@ -129,6 +120,11 @@ export const Comment = ({
                 )}
             </div>
             {isReplying && <CommentForm onSubmit={onCommentReply} />}
+            {childComments?.length > 0 && (
+                <div className="pl-6">
+                    <CommentList comments={childComments} />
+                </div>
+            )}
         </div>
     );
 };

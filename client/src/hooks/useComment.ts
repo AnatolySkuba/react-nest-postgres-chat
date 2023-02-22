@@ -24,6 +24,24 @@ export const useComment = () => {
 
     const [comments, setComments] = useState<Comment[]>();
 
+    const commentsByParentId = useMemo(() => {
+        interface IGroup {
+            [name: string]: Comment[];
+        }
+        const group: IGroup = {};
+        comments?.forEach((comment) => {
+            if (typeof comment.parentId === "string") {
+                group[comment.parentId] = [];
+                group[comment.parentId].push(comment);
+            }
+        });
+        return group;
+    }, [comments]);
+
+    function getReplies(parentId: string) {
+        return commentsByParentId[parentId];
+    }
+
     useEffect(() => {
         if (!didInit) {
             didInit = true;
@@ -76,5 +94,5 @@ export const useComment = () => {
         []
     );
 
-    return { comments, commentActions };
+    return { comments, commentActions, getReplies, commentsByParentId };
 };
