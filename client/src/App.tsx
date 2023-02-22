@@ -1,14 +1,13 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { ChatScreen, Form } from "./components";
+import { CommentList } from "./components/CommentList";
 import "./App.css";
 
 function App() {
     return (
-        <div className="p-3">
-            <ChatScreen />
-            <Form />
+        <div className="mx-auto p-3 max-w-2xl h-full overflow-auto">
+            <CommentList />
             <ToastContainer newestOnTop={false} limit={3} />
         </div>
     );

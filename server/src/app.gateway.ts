@@ -7,7 +7,7 @@ import {
     WebSocketGateway,
     WebSocketServer,
 } from "@nestjs/websockets";
-import { Message, Prisma } from "@prisma/client";
+import { Comment, Prisma } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { CLIENT_URI } from "../constants";
 import { AppService } from "./app.service";
@@ -40,7 +40,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @SubscribeMessage("message:post")
     async handleMessagePost(
         @MessageBody()
-        payload: Prisma.MessageCreateInput | Prisma.MessageUncheckedCreateInput
+        payload: Prisma.CommentCreateInput | Prisma.CommentUncheckedCreateInput
     ): Promise<void> {
         if (Object.keys(payload).includes("userId")) {
             const user = await this.appService.getUserById(payload["userId"]);
@@ -72,7 +72,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         if (payload["user"]["create"]["homePage"] !== user.homePage) {
             await this.appService.updateOrCreateUser({
                 ...user,
-                homePage: payload["user"]["create"]["homePage"],
+                homePage: !!payload["user"]["create"]["homePage"]
+                    ? payload["user"]["create"]["homePage"]
+                    : user.homePage,
             });
             this.appService.updateMessage({ ...payload, userId: user.id });
         }
@@ -84,8 +86,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
             userId: user.id,
             userName: user.userName,
             avatar: user.avatar,
-            homePage: payload["user"]["create"]["homePage"],
-            previous: payload.previous,
+            homePage: !!payload["user"]["create"]["homePage"]
+                ? payload["user"]["create"]["homePage"]
+                : user.homePage,
         });
 
         this.successMessage({ message: "Comment saved", createdMessage });
@@ -94,19 +97,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @SubscribeMessage("message:put")
     async handleMessagePut(
         @MessageBody()
-        payload: // { id: number, text: string }
-        // MessageUpdatePayload
-        Prisma.MessageCreateInput | Prisma.MessageUncheckedCreateInput
+        payload: Prisma.CommentUpdateInput
     ): Promise<void> {
-        const updatedMessage = await this.appService.updateMessage(payload);
-        this.server.emit("message:put", updatedMessage);
+        const updateComment = await this.appService.updateComment(payload);
+        this.server.emit("message:put", updateComment);
         this.handleMessagesGet();
     }
 
     @SubscribeMessage("message:delete")
     async handleMessageDelete(
         @MessageBody()
-        payload: Prisma.MessageWhereUniqueInput
+        payload: Prisma.CommentWhereUniqueInput
     ) {
         const removedMessage = await this.appService.removeMessage(payload);
         this.server.emit("message:delete", removedMessage);
@@ -133,7 +134,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         client.broadcast.emit("log", `${userName} disconnected`);
     }
 
-    successMessage({ message, createdMessage }: { message: string; createdMessage: Message }) {
+    successMessage({ message, createdMessage }: { message: string; createdMessage: Comment }) {
         this.server.emit("message:post", createdMessage);
         this.server.emit("log", {
             status: "success",

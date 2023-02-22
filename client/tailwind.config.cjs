@@ -7,7 +7,19 @@ module.exports = {
                 md: "0 3px 15px rgba(0, 0, 0, 0.2)",
             },
             maxWidth: {
-                100: "100px",
+                120: "120px",
+            },
+            fontSize: {
+                13: "13px",
+            },
+            lineHeight: {
+                2: "8px",
+            },
+            width: {
+                2.2: "9px",
+            },
+            height: {
+                2.2: "9px",
             },
         },
     },

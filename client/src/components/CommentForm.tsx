@@ -1,22 +1,28 @@
 import React, { useRef, useState } from "react";
 import { useFormik } from "formik";
 import { AvatarGenerator } from "random-avatar-generator";
+import { Prisma } from "@prisma/client";
 
-import { useChat, useAutoSizeTextArea } from "../../hooks";
-import { resizeImage, saveToCloudinary, storage } from "../../utils";
-import { Captcha } from "../Captcha";
-import { TAGS, SUPPORTED_IMAGE_FORMATS, AUTH_INPUTS, USER_INFO } from "../../constants";
-import { UserInfo } from "../../types";
-import { formSchema, formAuthorizedSchema } from "../../schemas";
+import { useAutoSizeTextArea } from "../hooks";
+import { resizeImage, saveToCloudinary, storage } from "../utils";
+import { Captcha } from "./Captcha";
+import { TAGS, SUPPORTED_IMAGE_FORMATS, AUTH_INPUTS, USER_INFO } from "../constants";
+import { UserInfo } from "../types";
+import { formSchema, formAuthorizedSchema } from "../schemas";
 
-export const Form = (): JSX.Element => {
+export const CommentForm = ({
+    onSubmit,
+    initialValue = "",
+}: {
+    onSubmit: (comment: Prisma.CommentCreateInput | Prisma.CommentUncheckedCreateInput) => void;
+    initialValue?: string;
+}): JSX.Element => {
     const userInfo = storage.get<UserInfo>(USER_INFO) as UserInfo;
     const [value, setValue] = useState("");
     const [imageSrc, setImageSrc] = useState("");
     const [captcha, setCaptcha] = useState({ inputCaptcha: "", isCaptcha: false });
     const textAreaRef = useRef(null);
     const fileRef = useRef(null);
-    const { chatActions } = useChat();
     const generator = new AvatarGenerator();
 
     useAutoSizeTextArea(textAreaRef.current, value);
@@ -26,7 +32,7 @@ export const Form = (): JSX.Element => {
             userName: "",
             email: "",
             homePage: "",
-            text: "",
+            text: initialValue,
             file: null,
             image: null,
             captcha: "",
@@ -35,11 +41,10 @@ export const Form = (): JSX.Element => {
         onSubmit: async ({ userName, text, homePage, file, image, email }) => {
             formik.resetForm();
             setCaptcha({ inputCaptcha: "", isCaptcha: false });
-            console.log(38, { userName, text, homePage, file, image, email });
             if (image) image = await saveToCloudinary(image);
             if (file) file = await saveToCloudinary(file);
 
-            chatActions.send(
+            onSubmit(
                 userInfo
                     ? {
                           text,
@@ -154,7 +159,7 @@ export const Form = (): JSX.Element => {
             </label>
             {formik.errors.file ? <p>{formik.errors.file}</p> : null}
             <button type="submit" className="btn my-4">
-                Add comment
+                {initialValue ? "Send comment" : "Add comment"}
             </button>
             {imageSrc && <img src={imageSrc} alt="preview" />}
         </form>

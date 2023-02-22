@@ -1,9 +1,9 @@
 import { useState, useEffect, FocusEventHandler } from "react";
 import { FormikTouched, FormikErrors } from "formik";
 
-import { useCanvas } from "../../hooks";
-import sprite from "../../assets/sprite.svg";
-import { notify } from "../../utils";
+import { useCanvas } from "../hooks";
+import sprite from "../assets/sprite.svg";
+import { notify } from "../utils";
 
 type Props = {
     formik: {

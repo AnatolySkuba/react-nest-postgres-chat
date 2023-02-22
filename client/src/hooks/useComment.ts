@@ -1,4 +1,4 @@
-import { Message, Prisma } from "@prisma/client";
+import { Comment, Prisma } from "@prisma/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -10,7 +10,7 @@ import { notify } from "../utils/notify";
 let socket: Socket;
 let didInit = false;
 
-export const useChat = () => {
+export const useComment = () => {
     const userInfo = storage.get<UserInfo>(USER_INFO) as UserInfo;
     const SERVER_URI = import.meta.env.VITE_SERVER_URI;
 
@@ -22,7 +22,7 @@ export const useChat = () => {
         });
     }
 
-    const [messages, setMessages] = useState<Message[]>();
+    const [comments, setComments] = useState<Comment[]>();
 
     useEffect(() => {
         if (!didInit) {
@@ -33,18 +33,17 @@ export const useChat = () => {
             });
         }
 
-        socket.on("messages", (messages: Message[]) => {
-            setMessages(messages);
+        socket.on("messages", (messages: Comment[]) => {
+            setComments(messages);
         });
 
         socket.emit("messages:get");
     }, []);
 
     const send = useCallback(
-        (payload: Prisma.MessageCreateInput | Prisma.MessageUncheckedCreateInput) => {
-            console.log(45, payload);
+        (payload: Prisma.CommentCreateInput | Prisma.CommentUncheckedCreateInput) => {
             socket.emit("message:post", payload);
-            socket.on("message:post", (message: Message) => {
+            socket.on("message:post", (message: Comment) => {
                 console.log(48, message); ///////////////////////////////////
                 storage.set<UserInfo>(USER_INFO, {
                     userName: message.userName.trim(),
@@ -55,11 +54,11 @@ export const useChat = () => {
         []
     );
 
-    // const update = useCallback((payload: MessageUpdatePayload) => {
-    //     socket.emit("message:put", payload);
-    // }, []);
+    const update = useCallback((payload: Prisma.CommentUpdateInput) => {
+        socket.emit("message:put", payload);
+    }, []);
 
-    const remove = useCallback((payload: Prisma.MessageWhereUniqueInput) => {
+    const remove = useCallback((payload: Prisma.CommentWhereUniqueInput) => {
         socket.emit("message:delete", payload);
     }, []);
 
@@ -68,14 +67,14 @@ export const useChat = () => {
         location.reload();
     }, []);
 
-    const chatActions = useMemo(
+    const commentActions = useMemo(
         () => ({
             send,
-            // update,
+            update,
             remove,
         }),
         []
     );
 
-    return { messages, chatActions };
+    return { comments, commentActions };
 };
