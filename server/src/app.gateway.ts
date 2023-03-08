@@ -50,7 +50,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
                     avatar: user.avatar,
                 },
             });
-            this.successMessage({ message: "Message saved2", result });
+            this.successMessage({ message: "Message saved", result });
             return;
         }
 
