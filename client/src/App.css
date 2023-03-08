@@ -18,10 +18,6 @@
         overflow: hidden;
     }
 
-    .btn {
-        @apply py-1.5 px-4 transition-colors bg-green-600 border active:bg-green-800 font-medium border-green-700 text-white rounded-lg hover:bg-green-700 disabled:opacity-50;
-    }
-
     .icon-btn {
         @apply text-green-600 hover:text-green-500 focus-visible:text-green-500;
     }

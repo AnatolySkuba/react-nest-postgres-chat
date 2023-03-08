@@ -1,8 +1,8 @@
 {
-    "name": "react-nest-postgres-chat",
+    "name": "react-nest-postgres-messages",
     "version": "1.0.0",
     "main": "index.js",
-    "repository": "git@github.com:AnatolySkuba/react-nest-postgres-chat.git",
+    "repository": "git@github.com:AnatolySkuba/react-nest-postgres-messages.git",
     "author": "Anatoly Skuba <anatoly.skuba@gmail.com>",
     "license": "MIT",
     "private": true,

@@ -7,7 +7,7 @@ import {
     WebSocketGateway,
     WebSocketServer,
 } from "@nestjs/websockets";
-import { Comment, Prisma } from "@prisma/client";
+import { Message, Prisma } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { CLIENT_URI } from "../constants";
 import { AppService } from "./app.service";
@@ -19,7 +19,7 @@ const users: Record<string, string> = {};
         origin: CLIENT_URI,
     },
     serveClient: false,
-    namespace: "chat",
+    namespace: "message",
 })
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly appService: AppService) {}
@@ -38,26 +38,29 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     @SubscribeMessage("message:post")
-    async handleMessagePost(
+    async handleMessagesPost(
         @MessageBody()
-        payload: Prisma.CommentCreateInput | Prisma.CommentUncheckedCreateInput
+        payload: Prisma.MessageCreateInput | Prisma.MessageUncheckedCreateInput
     ): Promise<void> {
-        if (Object.keys(payload).includes("userId")) {
+        if ("userId" in payload) {
             const user = await this.appService.getUserById(payload["userId"]);
-            const createdMessage = await this.appService.createMessage({
-                ...payload,
-                avatar: user.avatar,
-                homePage: user.homePage,
+            const result = await this.appService.createMessage({
+                data: {
+                    ...payload,
+                    avatar: user.avatar,
+                },
             });
-            this.successMessage({ message: "Comment saved", createdMessage });
+            this.successMessage({ message: "Message saved2", result });
             return;
         }
 
         const user = await this.appService.getUser(payload["user"]["create"]["email"]);
 
         if (!user) {
-            const createdMessage = await this.appService.createMessage(payload);
-            this.successMessage({ message: "Comment saved", createdMessage });
+            const result = await this.appService.createMessage({
+                data: { ...payload },
+            });
+            this.successMessage({ message: "Message saved", result });
             return;
         }
 
@@ -69,48 +72,70 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
             return;
         }
 
-        if (payload["user"]["create"]["homePage"] !== user.homePage) {
-            await this.appService.updateOrCreateUser({
-                ...user,
-                homePage: !!payload["user"]["create"]["homePage"]
-                    ? payload["user"]["create"]["homePage"]
-                    : user.homePage,
-            });
-            this.appService.updateMessage({ ...payload, userId: user.id });
-        }
-
-        const createdMessage = await this.appService.createMessage({
-            text: payload.text,
-            file: payload.file,
-            image: payload.image,
-            userId: user.id,
-            userName: user.userName,
-            avatar: user.avatar,
-            homePage: !!payload["user"]["create"]["homePage"]
-                ? payload["user"]["create"]["homePage"]
-                : user.homePage,
+        const result = await this.appService.createMessage({
+            data: {
+                text: payload.text,
+                files: payload.files,
+                images: payload.images,
+                parentId: payload.parentId,
+                userId: user.id,
+                userName: user.userName,
+                avatar: user.avatar,
+            },
         });
-
-        this.successMessage({ message: "Comment saved", createdMessage });
+        this.successMessage({ message: "Message saved", result });
     }
 
     @SubscribeMessage("message:put")
     async handleMessagePut(
         @MessageBody()
-        payload: Prisma.CommentUpdateInput
+        {
+            id,
+            message,
+        }: {
+            id: Prisma.MessageWhereUniqueInput;
+            message: Prisma.MessageUncheckedCreateInput;
+        }
     ): Promise<void> {
-        const updateComment = await this.appService.updateComment(payload);
-        this.server.emit("message:put", updateComment);
+        const result = await this.appService.updateMessage({
+            id,
+            message,
+        });
+        this.successMessage({ message: "Message changed", result });
+        this.handleMessagesGet();
+    }
+
+    @SubscribeMessage("avatar:put")
+    async handleAvatarPut(
+        @MessageBody()
+        { id, avatar }: { id: string; avatar: string }
+    ): Promise<void> {
+        await this.appService.updateAvatar({
+            id,
+            avatar,
+        });
+        this.handleMessagesGet();
+    }
+
+    @SubscribeMessage("like:put")
+    async handleLikePut(
+        @MessageBody()
+        payload: {
+            userId: string;
+            messageId: string;
+        }
+    ): Promise<void> {
+        await this.appService.updateLike(payload);
         this.handleMessagesGet();
     }
 
     @SubscribeMessage("message:delete")
     async handleMessageDelete(
         @MessageBody()
-        payload: Prisma.CommentWhereUniqueInput
+        payload: Prisma.MessageWhereUniqueInput
     ) {
-        const removedMessage = await this.appService.removeMessage(payload);
-        this.server.emit("message:delete", removedMessage);
+        const result = await this.appService.removeMessage(payload);
+        this.server.emit("message:delete", result);
         this.handleMessagesGet();
     }
 
@@ -134,8 +159,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         client.broadcast.emit("log", `${userName} disconnected`);
     }
 
-    successMessage({ message, createdMessage }: { message: string; createdMessage: Comment }) {
-        this.server.emit("message:post", createdMessage);
+    successMessage({ message, result }: { message: string; result: Message }) {
+        this.server.emit("message:post", result);
         this.server.emit("log", {
             status: "success",
             message: message,
