@@ -17,5 +17,9 @@
     "dependencies": {
         "@prisma/client": "^4.10.1",
         "concurrently": "^7.6.0"
+    },
+    "engines": {
+        "node": ">=14 <15"
     }
+}
 }
