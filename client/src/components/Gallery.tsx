@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+// @ts-ignore
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { FaTrash } from "react-icons/fa";
 import "photoswipe/style.css";
