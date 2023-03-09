@@ -1,1 +1,1 @@
-export const CLIENT_URI = "http://localhost:5173";
+export const CLIENT_URI = "https://react-nest-postgres-chat.vercel.app";
