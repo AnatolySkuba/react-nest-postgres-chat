@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 // @ts-ignore
-// import PhotoSwipeLightbox from "photoswipe/dist/photoswipe-lightbox.esm.js";
-
-// import PhotoSwipeLightbox from "photoswipe/lightbox";
-
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+// import PhotoSwipeLightbox from 'photoswipe/dist/photoswipe-lightbox.esm.js';
 import { FaTrash } from "react-icons/fa";
 import "photoswipe/style.css";
 
@@ -21,19 +19,19 @@ export function Gallery({
     ) => void;
     images: Image[];
 }) {
-    // useEffect(() => {
-    //     let lightbox = new PhotoSwipeLightbox({
-    //         gallery: "#" + galleryID,
-    //         children: "a",
-    //         pswpModule: () => import("photoswipe"),
-    //     });
-    //     lightbox.init();
+    useEffect(() => {
+        let lightbox = new PhotoSwipeLightbox({
+            gallery: "#" + galleryID,
+            children: "a",
+            pswpModule: () => import("photoswipe"),
+        });
+        lightbox.init();
 
-    //     return () => {
-    //         lightbox.destroy();
-    //         lightbox = null;
-    //     };
-    // }, [galleryID]);
+        return () => {
+            lightbox.destroy();
+            lightbox = null;
+        };
+    }, [galleryID]);
 
     return (
         <div className="pswp-gallery flex mt-2 gap-2" id={galleryID}>
