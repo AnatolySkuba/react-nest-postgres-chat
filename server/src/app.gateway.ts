@@ -9,14 +9,13 @@ import {
 } from "@nestjs/websockets";
 import { Message, Prisma } from "@prisma/client";
 import { Server, Socket } from "socket.io";
-import { CLIENT_URI } from "../constants";
 import { AppService } from "./app.service";
 
 const users: Record<string, string> = {};
 
 @WebSocketGateway({
     cors: {
-        origin: CLIENT_URI,
+        origin: process.env.CLIENT_URI,
     },
     serveClient: false,
     namespace: "message",
