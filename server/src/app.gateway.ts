@@ -15,7 +15,7 @@ const users: Record<string, string> = {};
 
 @WebSocketGateway({
     cors: {
-        origin: process.env.CLIENT_URI,
+        origin: '*',
     },
     serveClient: false,
     namespace: "message",
