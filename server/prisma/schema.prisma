@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(uuid())
+  userName String
+  email    String    @unique
+  avatar   String
+  messages Message[]
+  likes    Like[]
+
+  @@unique([id, userName, avatar])
+  @@map("users")
+}
+
+model Message {
+  id     String  @id @default(uuid())
+  text   String
+  images Image[]
+  files  File[]
+  likes  Like[]
+
+  userId   String
+  user     User    @relation(fields: [userId, userName, avatar], references: [id, userName, avatar], onDelete: Cascade)
+  userName String
+  avatar   String
+  parentId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+}
+
+model File {
+  id        String   @id @default(uuid())
+  fileName  String
+  filePath  String
+  publicId  String
+  Message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String?
+
+  @@map("files")
+}
+
+model Image {
+  id       String @id @default(uuid())
+  largeURL String
+  publicId String
+  width    Int
+  height   Int
+
+  Message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String?
+
+  @@map("images")
+}
+
+model Like {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  messageId String
+
+  @@id([userId, messageId])
+  @@map("likes")
+}
