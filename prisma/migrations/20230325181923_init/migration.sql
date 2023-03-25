@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "users" (
-    "id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
     "userName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "avatar" TEXT NOT NULL,
@@ -10,12 +10,12 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "messages" (
-    "id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
     "text" TEXT NOT NULL,
-    "userId" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
     "userName" TEXT NOT NULL,
     "avatar" TEXT NOT NULL,
-    "parentId" UUID,
+    "parentId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -24,31 +24,31 @@ CREATE TABLE "messages" (
 
 -- CreateTable
 CREATE TABLE "files" (
-    "id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
     "fileName" TEXT NOT NULL,
     "filePath" TEXT NOT NULL,
     "publicId" TEXT NOT NULL,
-    "messageId" UUID,
+    "messageId" TEXT,
 
     CONSTRAINT "files_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "images" (
-    "id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
     "largeURL" TEXT NOT NULL,
     "publicId" TEXT NOT NULL,
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
-    "messageId" UUID,
+    "messageId" TEXT,
 
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "likes" (
-    "userId" UUID NOT NULL,
-    "messageId" UUID NOT NULL,
+    "userId" TEXT NOT NULL,
+    "messageId" TEXT NOT NULL,
 
     CONSTRAINT "likes_pkey" PRIMARY KEY ("userId","messageId")
 );

@@ -16,7 +16,8 @@
     },
     "dependencies": {
         "@prisma/client": "^4.10.1",
-        "concurrently": "^7.6.0"
+        "concurrently": "^7.6.0",
+        "netlify-cli": "^13.2.1"
     },
     "engines": {
         "node": ">=14 <15"
